@@ -7,7 +7,7 @@ public class BeyBladeMovement : MonoBehaviour
 
     Rigidbody rb;
 
-    int SilaOdpalu = 50;
+    int SilaOdpalu = 100;
 
     Vector3 screenPosition;
     Vector3 worldPosition;
@@ -15,11 +15,13 @@ public class BeyBladeMovement : MonoBehaviour
 
     Vector3 centreDest = new Vector3(0, 0, 1);
 
+    bool isMoving = false;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.drag = 0.0f; // Adjust the drag as needed
-        rb.angularDrag = 0.05f;
+        rb.drag = 0.05f; 
+        rb.angularDrag = 0.1f;
         rb.centerOfMass = new Vector3(0, 0.25f, 0);
     }
 
@@ -38,18 +40,29 @@ public class BeyBladeMovement : MonoBehaviour
             }
 
             Move(worldPosition);
+            isMoving = true;
         }
+
+        if (isMoving)
+            AddContinuousForce();
+        
     }
 
     private void FixedUpdate()
     {
         Rotate();
     }
+    private void AddContinuousForce()
+    {
+        //rb.AddForceAtPosition();
+        // add continuous force with ForceMode.Force, to keep beyblade spinning in circle
+    }
 
     private void Move(Vector3 pos)
     {
-        rb.AddForce((pos - transform.position).normalized * (SilaOdpalu), ForceMode.Impulse);
-        // movement to be finnished
+        
+        Vector3 dir = (pos - transform.position);
+        rb.AddForceAtPosition(dir.normalized * SilaOdpalu,transform.position,ForceMode.Impulse);
     }
 
     private void Rotate()
@@ -63,7 +76,7 @@ public class BeyBladeMovement : MonoBehaviour
         rb.inertiaTensor.z * rb.angularVelocity.z
         );
 
-        Debug.Log(angularMomentum);
+        
         rb.AddRelativeTorque(angularMomentum, ForceMode.Force);
         rb.AddTorque(antiGravityTorque, ForceMode.VelocityChange);
 
