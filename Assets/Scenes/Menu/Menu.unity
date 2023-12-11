@@ -249,6 +249,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   musicTracks:
   - {fileID: 8300000, guid: de492d523e4818b419d60a27850f20ba, type: 3}
+  - {fileID: 8300000, guid: 27063d848957ed840979d2fa1c54df23, type: 3}
+  - {fileID: 8300000, guid: 08cc80b69e7f9114e82493bb1c4b255e, type: 3}
 --- !u!82 &323383669
 AudioSource:
   m_ObjectHideFlags: 0
@@ -396,8 +398,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 7.1653, y: -152.76}
-  m_SizeDelta: {x: 198.38, y: 71.238}
+  m_AnchoredPosition: {x: 7.1652, y: -150.3605}
+  m_SizeDelta: {x: 198.38, y: 76.0371}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &380801995
 MonoBehaviour:
@@ -517,8 +519,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 7.1624, y: -79.064}
-  m_SizeDelta: {x: 198.38, y: 76.154}
+  m_AnchoredPosition: {x: 7.1638, y: -75.4647}
+  m_SizeDelta: {x: 198.38, y: 83.3526}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &431489805
 MonoBehaviour:
