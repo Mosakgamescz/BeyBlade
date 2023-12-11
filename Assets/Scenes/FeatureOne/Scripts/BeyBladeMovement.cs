@@ -9,6 +9,8 @@ public class BeyBladeMovement : MonoBehaviour
 
     int SilaOdpalu = 100;
 
+    
+
     Vector3 screenPosition;
     Vector3 worldPosition;
 
