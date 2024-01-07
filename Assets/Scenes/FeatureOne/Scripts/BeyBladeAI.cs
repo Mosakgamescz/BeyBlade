@@ -10,7 +10,7 @@ public class BeyBladeAI : MonoBehaviour
     Rigidbody rb;
     Collider col;
 
-    int SilaOdpalu = 100;
+    float Lives = 100;
 
     Vector3 screenPosition;
     Vector3 worldPosition; 
@@ -25,6 +25,14 @@ public class BeyBladeAI : MonoBehaviour
     private bool didHit = false;
 
     public Transform player;
+    public GameObject plajer;
+    private Rigidbody rbplayer;
+
+    private float dampingFactor = 0.8f;
+
+    public HealthBar healthBar;
+
+    public GameDecider gd;
 
     //private NavMeshAgent navMeshAgent;
 
@@ -32,6 +40,8 @@ public class BeyBladeAI : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
+        rbplayer = plajer.GetComponent<Rigidbody>();
+        healthBar.SetMaxHealth((int)Lives);
         //navMeshAgent = GetComponent<NavMeshAgent>();
         rb.centerOfMass = new Vector3(0, 0.25f, 0);
          vv = new Vector3(-45.257f, 4.37f, 30.119f);
@@ -40,51 +50,60 @@ public class BeyBladeAI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Rotate();
-
-        //Vector3 muv = ((new Vector3(player.position.x, 0, player.position.z) * 100 * Time.deltaTime)) - transform.position;
-
-        //float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-
-        //navMeshAgent.SetDestination(player.position);
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        Vector3 direction = player.position - transform.position;
-
-        if (distanceToPlayer > 10)
+        
+        gd.CheckLives((int)Lives, "enemy");
+        if (Lives > 20)
         {
-            transform.position = Vector3.MoveTowards(transform.position, player.position, 0.025f);
-            
-        }
-        else if(distanceToPlayer < 10)
-        {
-            if (canUse)
+          
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+            Vector3 direction = player.position - transform.position;
+
+            if (distanceToPlayer > 10)
             {
-            
-                if(!didHit)
-                {
-                    rb.AddForce(direction);
-                }
-                else if (didHit)
-                {
-                    StartCoroutine(SetUse());
-                    didHit = false;
-                }
+                transform.position = Vector3.MoveTowards(transform.position, player.position, 0.025f);
 
             }
-            else if(!canUse)
+            else if (distanceToPlayer < 10)
             {
-                direction.Normalize();
+                if (canUse)
+                {
+
+                    if (!didHit)
+                    {
+                        rb.AddForce(direction);
+                    }
+                    else if (didHit)
+                    {
+                        StartCoroutine(SetUse());
+                        didHit = false;
+                    }
+
+                }
+                else if (!canUse)
+                {
+                    direction.Normalize();
 
 
-                transform.position -= direction * 25 * Time.deltaTime;
+                    transform.position -= direction * 25 * Time.deltaTime;
+                }
+
+
             }
-           
-            
+
+
+            MoveCenter();
         }
+            
 
+      
+       
+    }
 
-        MoveCenter();
+    private void FixedUpdate()
+    {
+        
+        if(Lives > 20)
+            Rotate();
     }
 
     private void Move(Vector3 pos)
@@ -116,13 +135,16 @@ public class BeyBladeAI : MonoBehaviour
 
         Vector3 angularMomentum = new Vector3(
         rb.inertiaTensor.x * rb.angularVelocity.x,
-        rb.inertiaTensor.y * (rb.angularVelocity.y * SilaOdpalu),
+        rb.inertiaTensor.y * (rb.angularVelocity.y * Lives),
         rb.inertiaTensor.z * rb.angularVelocity.z
         );
+        
 
 
-        rb.AddRelativeTorque(angularMomentum, ForceMode.Force);
-        rb.AddTorque(antiGravityTorque, ForceMode.VelocityChange);
+        rb.AddTorque(new Vector3(0, angularMomentum.y, 0), ForceMode.Force);
+        //rb.AddRelativeTorque(angularMomentum, ForceMode.Force);
+
+        //rb.AddTorque(antiGravityTorque, ForceMode.VelocityChange);
 
     }
 
@@ -130,11 +152,14 @@ public class BeyBladeAI : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("beyblade") && ignoreCol == false)
         {
+            Lives -= Mathf.Round(rbplayer.velocity.magnitude);
+            healthBar.SetHealth((int)Lives);
+            rb.AddTorque(new Vector3(0, rb.inertiaTensor.y * rb.angularVelocity.y, 0) * -500, ForceMode.Impulse);
             didHit = true;   
-            float bounce = 2;
+            float bounce = 4;
             rb.AddForce(new Vector3(transform.position.x, 0, transform.position.z) * -bounce, ForceMode.Impulse);
-            ignoreCol = true;
-            StartCoroutine(Disablecol());
+            
+            //StartCoroutine(Disablecol());
 
         }
     }
@@ -153,13 +178,9 @@ public class BeyBladeAI : MonoBehaviour
         canUse = true;
     }
 
-    private void FollowPlayer()
+    private void GameEndBeyBlade()
     {
-
-    }
-
-    private void GoPassive()
-    {
-
+        //rb.AddRelativeTorque();
+        //rb.AddTorque();
     }
 }

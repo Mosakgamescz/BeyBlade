@@ -9,7 +9,9 @@ public class BeyBladeMovement : MonoBehaviour
     Rigidbody rb;
     Collider col;
 
-    float SilaOdpalu = 1000;
+    [SerializeField] private AudioSource collisionSoundClip;
+
+    float Lives = 100;
 
     public Transform enemyBeyBlade;
 
@@ -33,14 +35,25 @@ public class BeyBladeMovement : MonoBehaviour
 
     public Transform direction;
 
+    private LayerMask layerbeyblade;
+
+    public GameObject enembb;
+    private Rigidbody rbenembb;
+
+    public HealthBar healthBar;
+
+    public GameDecider gd;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
+        rbenembb = enembb.GetComponent<Rigidbody>();
+        healthBar.SetMaxHealth((int)Lives);
         rb.centerOfMass = new Vector3(0, 0.25f, 0);
         torqPom = new Vector3(-0.42f, 0.25f, -0.005f);
         rad = Vector3.Distance(rb.centerOfMass,torqPom);
-        
+
     }
 
     // Update is called once per frame
@@ -49,9 +62,9 @@ public class BeyBladeMovement : MonoBehaviour
         vertInput = Input.GetAxisRaw("Vertical");
         horInput = Input.GetAxisRaw("Horizontal");
 
-        torqueMomentum = rad * SilaOdpalu;
+        torqueMomentum = rad * Lives;
 
-        Debug.Log(torqueMomentum);
+        gd.CheckLives((int)Lives, "player");
         Rotate();
 
         
@@ -98,11 +111,14 @@ public class BeyBladeMovement : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            worldPosition = hit.point;
+            if (hit.collider.gameObject.layer != LayerMask.NameToLayer("beyblade"))
+            {
+                worldPosition = hit.point;
+            }
         }
 
         Vector3 dir = (worldPosition - transform.position);
-        rb.AddForceAtPosition(dir.normalized * 150, transform.position,ForceMode.Impulse);
+        rb.AddForceAtPosition(new Vector3(dir.x,0,dir.z).normalized * 20, transform.position,ForceMode.VelocityChange);
         
         
     }
@@ -127,12 +143,13 @@ public class BeyBladeMovement : MonoBehaviour
 
         Vector3 angularMomentum = new Vector3(
         rb.inertiaTensor.x * rb.angularVelocity.x,
-        rb.inertiaTensor.y * (rb.angularVelocity.y),
+        rb.inertiaTensor.y * (rb.angularVelocity.y * Lives),
         rb.inertiaTensor.z * rb.angularVelocity.z
         );
-        
-        rb.AddRelativeTorque(angularMomentum, ForceMode.Force);
-        rb.AddTorque(antiGravityTorque, ForceMode.VelocityChange);
+
+
+        rb.AddTorque(new Vector3(0,angularMomentum.y,0), ForceMode.Force);
+        //rb.AddTorque(antiGravityTorque, ForceMode.VelocityChange);
 
     }
 
@@ -140,11 +157,15 @@ public class BeyBladeMovement : MonoBehaviour
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer("beyblade") && ignoreCol == false)
         {
+            collisionSoundClip.Play();
+            rb.AddTorque(new Vector3(0, -rb.angularVelocity.y, 0) * 0.05f, ForceMode.Impulse);
+            Lives -= Mathf.Round(rbenembb.velocity.magnitude);
+            healthBar.SetHealth((int)Lives);
             Debug.Log("funguje1");
-            float bounce = 2;
+            float bounce = 4;
             rb.AddForce(new Vector3(transform.position.x,0,transform.position.z) * -bounce,ForceMode.Impulse);
-            ignoreCol = true;
-            StartCoroutine(Disablecol());
+            
+            //StartCoroutine(Disablecol());
             
         }
         
